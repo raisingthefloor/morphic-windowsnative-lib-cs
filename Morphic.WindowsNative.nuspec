@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>Morphic.WindowsNative</id>
+    <version>1.7.2</version>
+    <authors>Raising the Floor - US, Inc.</authors>
+    <license type="expression">BSD-3-Clause</license>
+    <licenseUrl>https://licenses.nuget.org/BSD-3-Clause</licenseUrl>
+    <description>Morphic Windows Native features library (C#)</description>
+    <copyright>Copyright 2021-2023 Raising the Floor - US, Inc.</copyright>
+    <repository url="https://github.com/raisingthefloor/morphic-windowsnative-lib-cs" />
+    <dependencies>
+      <group targetFramework="net6.0">
+        <dependency id="Microsoft.Win32.SystemEvents" version="7.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Windows.CsWinRT" version="2.0.1" exclude="Build,Analyzers" />
+        <dependency id="Morphic.Core" version="1.2.0" exclude="Build,Analyzers" />
+        <dependency id="PInvoke.AdvApi32" version="0.7.124" exclude="Build,Analyzers" />
+        <dependency id="PInvoke.User32" version="0.7.124" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\x86\Release\net6.0-windows10.0.22621.0\Morphic.WindowsNative.dll" target="runtimes\win10-x86\lib\net6.0-windows10.0.22621.0" />
+    <file src="bin\x64\Release\net6.0-windows10.0.22621.0\Morphic.WindowsNative.dll" target="runtimes\win10-x64\lib\net6.0-windows10.0.22621.0" />
+    <file src="bin\arm64\Release\net6.0-windows10.0.22621.0\Morphic.WindowsNative.dll" target="runtimes\win10-arm64\lib\net6.0-windows10.0.22621.0" />
+  </files>
+</package>
