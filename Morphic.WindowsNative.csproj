@@ -6,13 +6,18 @@
     <Nullable>enable</Nullable>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
-    <Version>1.7.2</Version>
+    <Version>1.7.3</Version>
     <Authors>Raising the Floor - US, Inc.</Authors>
     <Company>Raising the Floor - US, Inc.</Company>
     <Product>Morphic Windows Native features library</Product>
     <Copyright>Copyright 2021-2023 Raising the Floor - US, Inc.</Copyright>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/raisingthefloor/morphic-windowsnative-lib-cs</RepositoryUrl>
+  </PropertyGroup>
+
+  <!-- Workaround for current .NET compiler bug (.NET SDK 6.0.405), so that the DEBUG define constant (and Debug.Assert exceptions) doesn't get compiled into Release builds -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
