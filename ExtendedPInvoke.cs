@@ -522,6 +522,18 @@ public struct ExtendedPInvoke
         HCF_OPTION_NOTHEMECHANGE = 0x00001000,
     }
 
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-msllhookstruct
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MSLLHOOKSTRUCT
+    {
+        public PInvoke.POINT pt;
+        // NOTE: the mouseData DWORD is apparently used as a signed integer (rather than as a uint)
+        public int mouseData;
+        public uint flags;
+        public uint time;
+        public UIntPtr dwExtraInfo;
+    }
+
     // NOTE: these attributes were painstakingly observed and captured by hand from "C:\Program Files (x86)\Windows Kits\10\Lib\10.0.17763.0\um\x64\fileextd.lib" (Windows 10 1809 SDK) using Ghidra; they appear to be undocumented
     // NOTE: these attributes were corroborated at: http://www.brandonfa.lk/win8/win8_devrel_head_x86/webcamui.h
     // NOTE: the enum name, WINDOWCOMPOSITIONATTRIB, is assumed (based on the string immediately following the WCA_ values in fileextd.lib); these are grouped together for convenience (and may technically just be a list of consts)
@@ -571,6 +583,10 @@ public struct ExtendedPInvoke
     // NOTE: this undocumented function was documented at http://undoc.airesoft.co.uk/user32.dll/SetWindowCompositionAttribute.php
     [DllImport("user32.dll", SetLastError = true)]
     internal static extern bool SetWindowCompositionAttribute(IntPtr hwnd, ref WINDOWCOMPOSITIONATTRIBDATA pAttrData);
+
+    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unhookwindowshookex
+    [DllImport("user32.dll")]
+    internal static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
     #endregion user32.dll (reverse engineered, not WinUser.h)
 

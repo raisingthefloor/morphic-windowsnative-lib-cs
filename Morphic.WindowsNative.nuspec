@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Morphic.WindowsNative</id>
-    <version>1.7.9</version>
+    <version>1.8.0</version>
     <authors>Raising the Floor - US, Inc.</authors>
     <license type="expression">BSD-3-Clause</license>
     <licenseUrl>https://licenses.nuget.org/BSD-3-Clause</licenseUrl>
