@@ -1,4 +1,4 @@
-﻿// Copyright 2022 Raising the Floor - US, Inc.
+﻿// Copyright 2022-2023 Raising the Floor - US, Inc.
 //
 // Licensed under the New BSD license. You may not use this file except in
 // compliance with this License.
@@ -114,7 +114,8 @@ public class ColorFilters
         {
             foreach (EventHandler element in invocationList!)
             {
-                Task.Run(() => {
+                Task.Run(() => 
+				{
                     element.Invoke(null /* static class, no so type instance */, EventArgs.Empty);
                 });
             }
