@@ -1,4 +1,4 @@
-﻿// Copyright 2022 Raising the Floor - US, Inc.
+﻿// Copyright 2022-2024 Raising the Floor - US, Inc.
 //
 // Licensed under the New BSD license. You may not use this file except in
 // compliance with this License.
@@ -23,11 +23,7 @@
 
 using Morphic.Core;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Morphic.WindowsNative.Packaging
 {
@@ -37,16 +33,17 @@ namespace Morphic.WindowsNative.Packaging
         {
             // STEP 1: capture the length of the package full name
             uint packageFullNameLength = 0;
-            var emptyPackageFullName = "";
             //
-            var getCurrentPackageFullNameResult = ExtendedPInvoke.GetCurrentPackageFullName(ref packageFullNameLength, emptyPackageFullName);
+            // capture the size of the package's full name
+            // see: https://learn.microsoft.com/en-us/windows/win32/api/appmodel/nf-appmodel-getcurrentpackagefullname
+            var getCurrentPackageFullNameResult = Windows.Win32.PInvoke.GetCurrentPackageFullName(ref packageFullNameLength, null);
             switch (getCurrentPackageFullNameResult)
             {
-                case (int)PInvoke.Win32ErrorCode.APPMODEL_ERROR_NO_PACKAGE:
+                case Windows.Win32.Foundation.WIN32_ERROR.APPMODEL_ERROR_NO_PACKAGE:
                     // the process has no package identity
                     return MorphicResult.OkResult(false);
-                case (int)PInvoke.Win32ErrorCode.ERROR_INSUFFICIENT_BUFFER:
-                    // this is the expected result; the packageFullNameLength parameter should contain the correct length
+                case Windows.Win32.Foundation.WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER:
+                    // this is the expected result (since we passed in a length of zero); the packageFullNameLength parameter should contain the correct length
                     break;
                 default:
                     Debug.Assert(false, "Unknown error code: " + getCurrentPackageFullNameResult.ToString());
@@ -55,30 +52,34 @@ namespace Morphic.WindowsNative.Packaging
 
             // STEP 2: capture the package full name (using an appropriately-sized buffer)
             //
-            // resize the package to the length indicated in our initial call (via the return-by-reference variable 'packageFullNameLength')
-            var packageFullName = new string(' ', (int)packageFullNameLength);
-            //
             // capture the package's full name
-            getCurrentPackageFullNameResult = ExtendedPInvoke.GetCurrentPackageFullName(ref packageFullNameLength, packageFullName);
-            //
-            switch (getCurrentPackageFullNameResult)
+            string packageFullName;
+            unsafe
             {
-                case (int)PInvoke.Win32ErrorCode.ERROR_SUCCESS:
-                    break;
-                case (int)PInvoke.Win32ErrorCode.APPMODEL_ERROR_NO_PACKAGE:
-                    // the process has no package identity
-                    return MorphicResult.OkResult(false);
-                case (int)PInvoke.Win32ErrorCode.ERROR_INSUFFICIENT_BUFFER:
-                    // the provided buffer was not large enough
-                    Debug.Assert(false, "Buffer provided to GetCurrentPackageFullName API was not large enough.");
-                    throw new Exception("Buffer provided to GetCurrentPackageFullName API was not large enough.");
-                default:
-                    Debug.Assert(false, "Unknown error code: " + getCurrentPackageFullNameResult.ToString());
-                    return MorphicResult.ErrorResult();
+                // resize the package to the length indicated in our initial call (via the return-by-reference variable 'packageFullNameLength')
+                fixed (char* packageFullNameAsUnsafeChars = new char[(int)packageFullNameLength])
+                {
+                    // see: https://learn.microsoft.com/en-us/windows/win32/api/appmodel/nf-appmodel-getcurrentpackagefullname
+                    getCurrentPackageFullNameResult = Windows.Win32.PInvoke.GetCurrentPackageFullName(ref packageFullNameLength, packageFullNameAsUnsafeChars);
+                    switch (getCurrentPackageFullNameResult)
+                    {
+                        case Windows.Win32.Foundation.WIN32_ERROR.ERROR_SUCCESS:
+                            // extract the package name (which should presumably be the full string minus the null terminator)
+                            packageFullName = new string(packageFullNameAsUnsafeChars, 0, (int)packageFullNameLength - 1 /* -1 for null terminator */);
+                            break;
+                        case Windows.Win32.Foundation.WIN32_ERROR.APPMODEL_ERROR_NO_PACKAGE:
+                            // the process has no package identity
+                            return MorphicResult.OkResult(false);
+                        case Windows.Win32.Foundation.WIN32_ERROR.ERROR_INSUFFICIENT_BUFFER:
+                            // the provided buffer was not large enough
+                            Debug.Assert(false, "Buffer provided to GetCurrentPackageFullName API was not large enough; this probably represents a code bug.");
+                            return MorphicResult.ErrorResult(); // gracefully degrade
+                        default:
+                            Debug.Assert(false, "Unknown error code: " + getCurrentPackageFullNameResult.ToString());
+                            return MorphicResult.ErrorResult();
+                    }
+                }
             }
-
-            // extract the package name (which should presumably be the full string minus the null terminator)
-            packageFullName = packageFullName.ToString().Substring(0, (int)packageFullNameLength - 1 /* -1 for null terminator */);
 
             if (packageFullName != String.Empty)
             {
